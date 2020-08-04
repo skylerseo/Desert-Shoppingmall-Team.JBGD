@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edu.util">
+	<resultMap type="itemImgDto" id="itemImgResultMap">
+		<id 	column="ITEM_IMG_NO" 				property="itemImgNo"/>
+		<result column="ITEM_ORIGINAL_IMG_NAME" 			property="itemOriginalImgName"/>
+		<result column="ITEM_STORED_IMG_NAME" 			property="itemStoredImgName"/>
+		<result column="ITEM_IMG_SIZE" 			property="itemImgSize"/>
+		<result column="ITEM_IMG_THUMBNAIL" 			property="itemImgThumbnail"/>
+		<result column="ITEM_IMG_CRE_DATE" 			property="itemImgCreDate"
+									javaType="java.util.Date"/>
+		<result column="ITEM_IMG_MOD_DATE" 			property="itemImgModDate"
+									javaType="java.util.Date"/>
+		<result column="ITEM_NO" 			property="itemNo"/>
+	</resultMap>
+	
+	<insert id="itemImgInsertOne" parameterType="map">
+		INSERT INTO ITEM_IMG
+		VALUE(ITEM_IMG_NO, ITEM_ORIGINAL_IMG_NAME, ITEM_STORED_IMG_NAME, ITEM_IMG_SIZE, ITEM_NO, ITEM_IMG_THUMBNAIL)
+		VALUES(ITEM_IMG_NO_SEQ.NEXTVAL, #{item_original_img_name}, #{item_stored_img_name}, #{item_img_size}, #{item_no}, #{option})
+	</insert>
+	
+	<insert id="itemImgThumbnailInsertOne" parameterType="map">
+		INSERT INTO ITEM_IMG
+		VALUE(ITEM_IMG_NO, ITEM_ORIGINAL_IMG_NAME, ITEM_STORED_IMG_NAME, ITEM_IMG_SIZE, ITEM_NO, ITEM_IMG_THUMBNAIL)
+		VALUES(ITEM_IMG_NO_SEQ.NEXTVAL, #{item_original_img_name}, #{item_stored_img_name}, #{item_img_size}, #{item_no}, 'true')
+	</insert>
+	
+	<select id="itemImgSelectList" parameterType="int" resultMap="itemImgResultMap">
+		SELECT ITEM_IMG_NO, ITEM_STORED_IMG_NAME, ITEM_ORIGINAL_IMG_NAME, ITEM_IMG_THUMBNAIL
+		FROM ITEM_IMG
+		WHERE ITEM_NO = #{itemNo}
+	</select>
+	
+	<update id="itemImgUpdateOne" parameterType="map">
+		UPDATE ITEM_IMG
+		SET ITEM_ORIGINAL_IMG_NAME = #{item_original_img_name}, ITEM_STORED_IMG_NAME = #{item_stored_img_name}
+		, ITEM_IMG_SIZE = #{item_img_size}, ITEM_IMG_MOD_DATE = SYSDATE
+		WHERE ITEM_IMG_NO = #{itemImgNo}
+	</update>
+	
+	<delete id="itemImgDeleteOne" parameterType="int">
+		DELETE FROM ITEM_IMG
+		WHERE ITEM_IMG_NO = #{itemImgNo}
+	</delete>
+	
+	<delete id="itemImgDeleteList" parameterType="int">
+		DELETE FROM ITEM_IMG
+		WHERE ITEM_NO = #{itemNo}
+	</delete>
+	
+	<select id="itemImgSelectOne" parameterType="int" resultType="String">
+		SELECT ITEM_STORED_IMG_NAME
+		FROM ITEM_IMG
+		WHERE ITEM_IMG_NO = #{itemImgNo}
+	</select>
+</mapper>

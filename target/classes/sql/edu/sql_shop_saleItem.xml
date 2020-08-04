@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edu.shop.sale">
+
+	<resultMap type="saleItemDto" id="saleItemDtoResultMap">
+		<id 	column="SALE_NO" 				property="saleNo"/>
+		<result column="ITEM_NO" 			property="itemNo"/>
+		<result column="SALE_ITEM_VOLUME" 			property="saleItemVolume"/>
+		<result column="ITEM_OPTION_NO" 			property="itemOptionNo"/>
+	</resultMap>
+
+	<insert id="saleItemInsertOne" parameterType="saleItemDto">
+		INSERT INTO SALE_ITEM
+		VALUE(SALE_NO, ITEM_NO, ITEM_NAME, SALE_ITEM_VOLUME, ITEM_OPTION_NO, ITEM_OPTION_NAME)
+		VALUES(#{saleNo}, #{itemNo}, #{itemName}, #{saleItemVolume}, #{itemOptionNo}, #{itemOptionName})
+	</insert>
+
+	<select id="saleItemSimpleSelectList" parameterType="int" resultMap="saleItemDtoResultMap">
+		SELECT SALE_NO, ITEM_NO, SALE_ITEM_VOLUME
+		FROM SALE_ITEM
+		WHERE SALE_NO = #{saleNo}
+	</select>
+</mapper>
+

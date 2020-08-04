@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edu.shop.item">
+
+	<resultMap type="itemDto" id="itemResultMap">
+		<id 	column="ITEM_NO" 				property="itemNo"/>
+		<result column="ITEM_NAME" 			property="itemName"/>
+		<result column="ITEM_PRICE" 			property="itemPrice"/>
+		<result column="ITEM_STOCK" 			property="itemStock"/>
+		<result column="ITEM_CONTENT" 			property="itemContent"/>
+		<result column="ITEM_CRE_DATE" 			property="itemCreDate"
+									javaType="java.util.Date"/>
+		<result column="ITEM_MOD_DATE" 			property="itemModDate"
+									javaType="java.util.Date"/>
+		<result column="ITEM_VIEW_COUNT" 			property="itemViewCount"/>
+		<result column="ITEM_SOLD_COUNT" 			property="itemSoldCount"/>
+		<result column="ITEM_STATE" 			property="itemState"/>
+	</resultMap>
+		
+	<select id="itemSelectTotalCount" parameterType="map" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM ITEM
+		WHERE ITEM_NAME LIKE '%'||#{keyword}||'%'
+	</select>
+	
+	<insert id="itemInsertOne" parameterType="itemDto">
+		INSERT INTO ITEM
+		VALUE(ITEM_NO, ITEM_NAME, ITEM_PRICE, ITEM_STOCK, ITEM_CONTENT, ITEM_STATE)
+		VALUES(ITEM_NO_SEQ.NEXTVAL, #{itemName}, #{itemPrice}, #{itemStock}, #{itemContent}, #{itemState})
+	</insert>
+
+	<select id="itemSelectOne" parameterType="map" resultMap="itemResultMap">
+		SELECT ITEM_NO, ITEM_NAME, ITEM_PRICE, ITEM_STOCK, ITEM_CONTENT, ITEM_STATE
+		FROM ITEM
+		WHERE ${option} = #{uniqueKey}
+	</select>
+	
+	<update id="itemStateUpdateOne" parameterType="map">
+		UPDATE ITEM
+		SET ITEM_STATE = #{itemState}
+		WHERE ITEM_NO = #{itemNo}
+	</update>
+	
+	<update id="itemUpdateOne" parameterType="map">
+		UPDATE ITEM
+		SET ITEM_NAME = #{itemName}, ITEM_PRICE = #{itemPrice}, ITEM_STOCK = #{itemStock}, ITEM_CONTENT = #{itemContent}, ITEM_MOD_DATE = SYSDATE
+		WHERE ITEM_NO = #{itemNo}
+	</update>
+	
+	<delete id="itemDeleteOne" parameterType="int">
+		DELETE FROM ITEM
+		WHERE ITEM_NO = #{itemNo}
+	</delete>
+	
+	<update id="itemViewCountUpdateOne" parameterType="int">
+		UPDATE ITEM
+		SET ITEM_VIEW_COUNT = ITEM_VIEW_COUNT + 1
+		WHERE ITEM_NO = #{itemNo}
+	</update>
+	
+	<update id="itemStockUpdateOne" parameterType="int">
+		UPDATE ITEM
+		SET ITEM_STOCK = (SELECT SUM(ITEM_OPTION_STOCK)
+						  FROM ITEM_OPTION
+						  WHERE ITEM_NO = #{itemNo}
+						  AND ITEM_OPTION_STATE = '활성화'
+						  GROUP BY ITEM_NO)
+		WHERE ITEM_NO = #{itemNo}
+	</update>
+	
+	<update id="itemSoldCountUpdateOne" parameterType="map">
+		UPDATE ITEM
+		SET ITEM_SOLD_COUNT = ITEM_SOLD_COUNT ${mark} #{saleItemVolume}
+		WHERE ITEM_NO = #{itemNo}
+	</update>
+	
+	<select id="itemStatisticsSelectList" resultMap="itemResultMap">
+		SELECT ITEM_NO, ITEM_NAME, ITEM_PRICE, ITEM_CRE_DATE, ITEM_SOLD_COUNT, ITEM_STATE, ITEM_VIEW_COUNT
+		FROM (
+		        SELECT ROWNUM RNUM, ITEM_NO, ITEM_NAME, ITEM_PRICE, ITEM_CRE_DATE, ITEM_SOLD_COUNT, ITEM_STATE, ITEM_VIEW_COUNT
+		        FROM (
+		                SELECT ITEM_NO, ITEM_NAME, ITEM_PRICE, ITEM_CRE_DATE, ITEM_SOLD_COUNT, ITEM_STATE, ITEM_VIEW_COUNT
+		                FROM ITEM
+		                WHERE ITEM_NAME LIKE '%'||#{keyword}||'%'
+		                ORDER BY ${orderBy} ${orderOption}) )
+		WHERE RNUM BETWEEN #{start} AND #{end}
+	</select>	
+</mapper>
+

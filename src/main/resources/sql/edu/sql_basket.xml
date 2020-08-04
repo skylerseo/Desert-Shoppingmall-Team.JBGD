@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edu.shop.sale">
+
+	<resultMap type="basketDto" id="basketDtoResultMap">
+		<id 	column="BASKET_NO" 				property="basketNo"/>
+		<result column="ITEM_NO" 			property="itemNo"/>
+		<result column="BASKET_ITEM_VOLUME" 			property="basketItemVolume"/>
+		<result column="ITEM_OPTION_NO" 			property="itemOptionNo"/>
+		<result column="CUSTOMER_NO" 			property="customerNo"/>
+	</resultMap>
+
+	<insert id="basketInsertOne" parameterType="basketDto">
+		INSERT INTO BASKET
+		VALUE(BASKET_NO, ITEM_NO, BASKET_ITEM_VOLUME, ITEM_OPTION_NO, CUSTOMER_NO)
+		VALUES(BASKET_NO_SEQ.NEXTVAL, #{itemNo}, #{basketItemVolume}, #{itemOptionNo}, #{customerNo})
+	</insert>
+	
+	<select id="basketSelectOne" parameterType="map" resultMap="basketDtoResultMap">
+		SELECT BASKET_NO, BASKET_ITEM_VOLUME
+		FROM BASKET
+		WHERE ITEM_NO = #{itemNo}
+		AND ITEM_OPTION_NO = #{itemOptionNo}
+		AND CUSTOMER_NO = #{customerNo}
+	</select>
+	
+	<update id="basketUpdateOne" parameterType="map">
+		UPDATE BASKET
+		SET BASKET_ITEM_VOLUME = #{basketItemVolume}
+		WHERE BASKET_NO = #{basketNo}
+	</update>
+	
+	<delete id="basketDeleteOne" parameterType="int">
+		DELETE FROM BASKET
+		WHERE BASKET_NO = #{basketNo}
+	</delete>
+	
+	<delete id="basketDeleteList" parameterType="int">
+		DELETE FROM BASKET
+		WHERE CUSTOMER_NO = #{customerNo}
+	</delete>
+	
+	
+</mapper>

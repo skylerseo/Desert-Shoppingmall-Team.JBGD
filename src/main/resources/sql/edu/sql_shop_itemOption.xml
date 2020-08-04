@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edu.shop.item">
+
+	<resultMap type="itemOptionDto" id="itemOptionResultMap">
+		<id 	column="ITEM_OPTION_NO" 				property="itemOptionNo"/>
+		<result column="ITEM_OPTION_NAME" 			property="itemOptionName"/>
+		<result column="ITEM_OPTION_PRICE" 			property="itemOptionPrice"/>
+		<result column="ITEM_OPTION_STOCK" 			property="itemOptionStock"/>
+		<result column="ITEM_OPTION_SOLD_COUNT" 			property="itemOptionSoldCount"/>
+		<result column="ITEM_OPTION_CRE_DATE" 			property="itemOptionCreDate"
+									javaType="java.util.Date"/>
+		<result column="ITEMO_PTION_MOD_DATE" 			property="itemOptionModDate"
+									javaType="java.util.Date"/>
+		<result column="ITEM_OPTION_STATE" 			property="itemOptionState"/>
+		<result column="ITEM_NO" 			property="itemNo"/>
+	</resultMap>
+
+	
+	<select id="itemOptionSelectList" parameterType="int" resultMap="itemOptionResultMap">
+		SELECT ITEM_OPTION_NO, ITEM_OPTION_NAME, ITEM_OPTION_PRICE, ITEM_OPTION_STOCK, ITEM_OPTION_SOLD_COUNT, ITEM_OPTION_CRE_DATE, ITEM_NO
+		FROM ITEM_OPTION
+		WHERE ITEM_NO = #{itemNo}
+		AND ITEM_OPTION_STATE = '활성화'
+		ORDER BY ITEM_OPTION_NO
+	</select>
+	
+	<update id="itemEzUpdateOne" parameterType="itemOptionDto">
+		UPDATE ITEM_OPTION
+		SET ITEM_OPTION_STOCK = #{itemOptionStock}
+		WHERE ITEM_OPTION_NO = #{itemOptionNo}
+	</update>
+	
+	<update id="itemOptionStockUpdateOne" parameterType="map">
+		UPDATE ITEM_OPTION
+		SET ITEM_OPTION_STOCK = ITEM_OPTION_STOCK ${mark} #{saleItemVolume}
+		WHERE ITEM_OPTION_NO = #{itemOptionNo}
+	</update>
+	
+	<insert id="itemOptionInsertOne" parameterType="itemOptionDto">
+		INSERT INTO ITEM_OPTION
+		VALUE(ITEM_OPTION_NO, ITEM_OPTION_NAME, ITEM_OPTION_PRICE, ITEM_OPTION_STOCK, ITEM_NO)
+		VALUES(ITEM_OPTION_NO_SEQ.NEXTVAL, #{itemOptionName}, #{itemOptionPrice}, #{itemOptionStock}, #{itemNo})
+	</insert>
+	
+	<update id="itemOptionUpdateOne" parameterType="itemOptionDto">
+		UPDATE ITEM_OPTION
+		SET ITEM_OPTION_NAME = #{itemOptionName}, ITEM_OPTION_PRICE = #{itemOptionPrice}, ITEM_OPTION_STOCK = #{itemOptionStock}
+		WHERE ITEM_OPTION_NO = #{itemOptionNo}
+	</update>
+	
+	<delete id="itemOptionStateUpdateOne" parameterType="itemOptionDto">
+		UPDATE ITEM_OPTION
+		SET ITEM_OPTION_STATE = '비활성화'
+		WHERE ITEM_OPTION_NO = #{itemOptionNo}
+	</delete>
+	
+	<update id="itemOptionSoldCountUpdateOne" parameterType="map">
+		UPDATE ITEM_OPTION
+		SET ITEM_OPTION_SOLD_COUNT = ITEM_OPTION_SOLD_COUNT ${mark} #{saleItemVolume}
+		WHERE ITEM_OPTION_NO = #{itemOptionNo}
+	</update>
+	
+	<delete id="itemOptionDeleteList" parameterType="int">
+		DELETE FROM ITEM_OPTION
+		WHERE ITEM_NO = #{itemNo}
+	</delete>
+</mapper>
+

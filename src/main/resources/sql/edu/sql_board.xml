@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edu.board">
+
+	<sql id="search">
+		<choose>
+			<when test="searchOption == 'all'">
+				WHERE BOARD_TITLE LIKE 	 '%'||#{keyword}||'%'
+				OR	  BOARD_CONTENT LIKE '%'||#{keyword}||'%'
+			</when>
+			<otherwise>
+				WHERE ${searchOption} LIKE '%'||#{keyword}||'%' 
+			</otherwise>		
+		</choose>	
+	</sql>
+
+	<resultMap type="boardCtmDto" id="boardResultMap">
+		<id	column=	   "CUSTOMER_ID"			property="customerId"/>		
+		<result column="BOARD_NO"			property="boardNo"/>
+		<result column="BOARD_TITLE" 		property="boardTitle"/>
+		<result	column="BOARD_CONTENT"		property="boardContent"/>
+		<result	column="BOARD_CRE_DATE" 	property="boardCreDate"
+										javaType="java.util.Date"	/>
+		<result	column="BOARD_MOD_DATE" 	property="boardModDate"
+										javaType="java.util.Date"/>
+		<result	column="BOARD_ORIGINAL_IMG" property="boardOriginalImg"/>
+		<result	column="BOARD_STORED_IMG" 	property="boardStoredImg"/>
+		<result	column="BOARD_IMG_SIZE"		property="boardImgSize"/>
+		<result	column="BOARD_VIEW_COUNT" 	property="boardViewCount"/>
+		<result	column="RCOUNT" 	property="rcount"/>
+		<result column="CUSTOMER_NO"        property="customerNo"/>
+		
+	</resultMap>
+	
+	<resultMap type="boardRplDto" id="replyResultMap">
+	
+		<id		column="CUSTOMER_ID"			property="customerId"/>
+		<result column="CUSTOMER_NO"			property="customerNo"/>
+		<result column="BOARD_NO" 				property="boardNo"/>
+		<result	column="REPLY_NO"				property="replyNo"/>
+		<result	column="REPLY_CONTENT" 			property="replyContent"/>
+		<result	column="REPLY_CRE_DATE" 		property="replyCreDate"
+										javaType="java.util.Date"/>
+
+	</resultMap>
+	
+<!-- 	게시판 리스트 조회 -->
+	<select id="boardSelectList" parameterType="map" resultMap="boardResultMap">
+            SELECT BOARD_NO, BOARD_TITLE, CUSTOMER_ID, BOARD_CRE_DATE, BOARD_VIEW_COUNT, RCOUNT
+			FROM (
+	        SELECT ROWNUM RNUM, S_LIST.BOARD_NO, S_LIST.BOARD_TITLE, S_LIST.CUSTOMER_ID, S_LIST.BOARD_CRE_DATE, S_LIST.BOARD_VIEW_COUNT, RCOUNT
+	        FROM (  SELECT B.BOARD_NO, B.BOARD_TITLE, M.CUSTOMER_ID, B.BOARD_CRE_DATE, B.BOARD_VIEW_COUNT, R.RCOUNT
+	                FROM CUSTOMER M JOIN BOARD B
+	                ON M.CUSTOMER_NO = B.CUSTOMER_NO
+	                LEFT OUTER JOIN (SELECT BOARD_NO, COUNT(REPLY_NO) RCOUNT
+	                                 FROM REPLY
+	                                 GROUP BY BOARD_NO) R
+	                ON B.BOARD_NO = R.BOARD_NO
+	                <include refid="search"></include>
+	                ORDER BY B.BOARD_NO DESC)S_LIST
+	            )
+			WHERE RNUM BETWEEN #{start} AND #{end}
+	</select>
+	
+<!-- 	게시판 총 갯수 -->
+	<select id="boardSelectTotalCount"
+		resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM BOARD
+		<include refid="search"></include>
+	</select>
+	
+<!-- 	글쓰기 -->
+	<insert id="boardInsertOne" parameterType="boardCtmDto">
+		
+		INSERT INTO BOARD
+		VALUE(BOARD_NO, BOARD_TITLE, BOARD_CONTENT , CUSTOMER_NO, BOARD_ORIGINAL_IMG, BOARD_STORED_IMG, BOARD_IMG_SIZE)
+		VALUES(BOARD_NO_SEQ.NEXTVAL, #{boardTitle}, #{boardContent}, #{customerNo}, #{boardOriginalImg}, #{boardStoredImg}, #{boardImgSize})
+	</insert>
+<!-- 	 BOARD_ORIGINAL_IMG, BOARD_STORED_IMG, BOARD_IMG_SIZE, CUSTOMER_NO -->
+<!-- 	 #{boardOriginalImg}, #{boardStoredImg}, #{boardImgSize}, , #{customerNo} -->
+	
+<!-- 게시판 상세 조회	 -->
+<select id="boardSelectOne" parameterType="int" resultMap="boardResultMap">
+	SELECT B.BOARD_NO, B.BOARD_TITLE, M.CUSTOMER_ID, 
+		 B.BOARD_CRE_DATE,
+		 B.BOARD_STORED_IMG, 
+		 B.BOARD_CONTENT
+	FROM BOARD B JOIN CUSTOMER M
+	ON B.CUSTOMER_NO = M.CUSTOMER_NO
+	WHERE B.BOARD_NO = #{boardNo}
+</select>	
+	
+	
+<!-- 글수정	 -->
+<update id="boardUpdateOne" parameterType="boardCtmDto">
+	UPDATE BOARD
+	<set>
+		<if test="boardTitle != ''">BOARD_TITLE = #{boardTitle},</if>
+		<if test="boardContent != ''">BOARD_CONTENT = #{boardContent},</if>	
+		BOARD_ORIGINAL_IMG = #{boardOriginalImg},
+		BOARD_STORED_IMG = #{boardStoredImg},
+		BOARD_MOD_DATE = SYSDATE
+	</set>	
+		WHERE BOARD_NO = #{boardNo}
+</update>
+
+<!-- 글 삭제 -->
+<delete id="boardDeleteOne" parameterType="int">
+	DELETE FROM BOARD
+	WHERE BOARD_NO = #{boardNo}
+</delete>
+
+<!--  조회수 -->
+<update id="boardViewOneUp" parameterType="int">
+	UPDATE BOARD
+	SET BOARD_VIEW_COUNT = BOARD_VIEW_COUNT + 1
+	WHERE BOARD_NO = #{boardNo}
+</update>
+
+<!-- 	덧글 리스트 조회 -->
+<select id="replySelectList" parameterType="int" resultMap="replyResultMap">
+	SELECT C.BOARD_NO , M.CUSTOMER_NAME , C.REPLY_CRE_DATE ,
+	C.REPLY_CONTENT, M.CUSTOMER_NO, M.CUSTOMER_ID, C.REPLY_NO
+	FROM REPLY C JOIN CUSTOMER M
+	ON C.CUSTOMER_NO = M.CUSTOMER_NO
+	WHERE C.BOARD_NO = #{boardNo}
+	ORDER BY C.REPLY_CRE_DATE DESC
+
+</select>
+	
+<!-- 	덧글 총갯수 -->
+<select id="replySlelctTotalCount"
+	resultType="java.lang.Integer">
+	SELECT COUNT(*)
+	FROM REPLY	
+</select>
+
+	
+<!-- 	덧글 등록 -->
+<insert id="replyInsertOne" parameterType="boardRplDto">
+	INSERT INTO REPLY
+	VALUE(REPLY_NO, REPLY_CONTENT, CUSTOMER_NO, BOARD_NO)
+	VALUES(REPLY_NO_SEQ.NEXTVAL, #{replyContent}, #{customerNo}, #{boardNo})	
+</insert>
+
+<!-- 덧글 수정 -->
+<update id="replyUpdateOne" parameterType="boardRplDto">
+	UPDATE REPLY
+	SET REPLY_CONTENT = #{replyContent}
+	WHERE REPLY_NO = #{replyNo} 
+</update>
+<!-- 덧글 삭제 -->
+<delete id="replyDeleteOne" parameterType="int">
+	DELETE FROM REPLY
+	WHERE REPLY_NO = #{replyNo}
+</delete>
+
+
+
+
+
+
+
+</mapper>

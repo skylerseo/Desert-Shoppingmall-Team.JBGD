@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<settings>
+		<setting name="logImpl" value="LOG4J" />
+	</settings>
+
+	<typeAliases>
+		<typeAlias type="com.edu.board.model.BoardCtmDto" alias="boardCtmDto" />
+		<typeAlias type="com.edu.board.model.BoardRplDto" alias="boardRplDto" />
+		<typeAlias type="com.edu.customer.model.CustomerDto" alias="customerDto" />
+		<typeAlias type="com.edu.shop.item.model.ItemDto" alias="itemDto" />
+		<typeAlias type="com.edu.shop.item.model.ItemListDto" alias="itemListDto" />
+		<typeAlias type="com.edu.shop.item.model.ItemOptionDto" alias="itemOptionDto" />
+		<typeAlias type="com.edu.util.model.ItemImgDto" alias="itemImgDto" />
+		<typeAlias type="com.edu.shop.sale.model.SaleDto" alias="saleDto" />
+		<typeAlias type="com.edu.shop.sale.model.SaleListDto" alias="saleListDto" />
+		<typeAlias type="com.edu.shop.sale.model.SaleItemDto" alias="saleItemDto" />
+		<typeAlias type="com.edu.shop.sale.model.SaleItemListDto" alias="saleItemListDto" />
+		<typeAlias type="com.edu.shop.sale.model.BasketDto" alias="basketDto" />
+		<typeAlias type="com.edu.shop.sale.model.BasketListDto" alias="basketListDto" />
+	</typeAliases>
+
+</configuration>

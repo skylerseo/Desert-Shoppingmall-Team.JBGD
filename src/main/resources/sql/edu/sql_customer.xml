@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edu.customer">
+
+	<resultMap type="CustomerDto" id="customerResultMap">
+		<id 	column="CUSTOMER_NO" 		property="customerNo"/>
+		<result column="CUSTOMER_ID" 		property="customerId"/>
+		<result column="CUSTOMER_PWD" 		property="customerPwd"/>
+		<result column="CUSTOMER_NAME" 		property="customerName"/>
+		<result column="CUSTOMER_EMAIL" 	property="customerEmail"/>
+		<result column="CUSTOMER_ADDR" 	property="customerAddr"/>
+		<result column="CUSTOMER_PHONE" 	property="customerPhone"/>
+		<result column="CUSTOMER_CRE_DATE" 	property="customerCreDate" 
+										javaType="java.util.Date"/>
+		<result column="CUSTOMER_MOD_DATE" 	property="customerModDate" 
+										javaType="java.util.Date"/>
+		<result column="CUSTOMER_MONEY" 	property="customerMoney"/>
+	</resultMap>
+
+	<!-- 	회원존재확인 -->
+	<select id="customerExist" parameterType="map" 
+								resultMap="customerResultMap">
+		SELECT CUSTOMER_NO, CUSTOMER_ID, CUSTOMER_NAME, CUSTOMER_EMAIL, CUSTOMER_ADDR, CUSTOMER_PHONE, CUSTOMER_MONEY
+		FROM CUSTOMER
+		WHERE CUSTOMER_ID = #{customerId}
+		AND CUSTOMER_PWD = #{customerPwd}
+	</select>
+	
+	<!-- 	회원추가 -->
+	<insert id="customerInsertOne" 
+		parameterType="com.edu.customer.model.CustomerDto">
+<!-- 		<selectKey keyProperty="no" resultType="int" order="BEFORE"> -->
+<!-- 			SELECT CUSTOMER_CUSTOMER_NO_SEQ.NEXTVAL FROM DUAL -->
+<!-- 		</selectKey> -->
+		INSERT INTO CUSTOMER
+		VALUE(CUSTOMER_NO, CUSTOMER_ID, CUSTOMER_PWD, CUSTOMER_NAME, CUSTOMER_EMAIL, CUSTOMER_ADDR, CUSTOMER_PHONE, CUSTOMER_CRE_DATE, CUSTOMER_MOD_DATE)
+		VALUES(CUSTOMER_NO_SEQ.NEXTVAL, #{customerId}, #{customerPwd}, #{customerName}, #{customerEmail}, #{customerAddr}, #{customerPhone}, SYSDATE, SYSDATE)
+	</insert>
+	
+<!-- 	회원 아이디 중복체크 -->
+	<select id="customerIdOverlapCheck" parameterType="customerDto"
+		resultMap="customerResultMap">
+		SELECT CUSTOMER_ID
+		FROM CUSTOMER
+		WHERE CUSTOMER_ID = #{customerId}
+	</select>
+	
+	<!-- 	회원 상세 조회 -->
+	<select id="customerSelectOne" parameterType="int" 
+		resultMap="customerResultMap">
+		SELECT CUSTOMER_NO, CUSTOMER_ID, CUSTOMER_NAME, CUSTOMER_EMAIL, CUSTOMER_ADDR, CUSTOMER_PHONE, CUSTOMER_CRE_DATE, CUSTOMER_MONEY
+		FROM CUSTOMER
+		WHERE CUSTOMER_NO = #{customerNo}
+	</select>
+	
+	<!-- 	회원정보 수정 -->
+	<update id="customerUpdateOne" parameterType="customerDto">
+		UPDATE CUSTOMER
+		<set>
+			<if test="customerPwd != ''">CUSTOMER_PWD = #{customerPwd},</if>
+			<if test="customerName != ''">CUSTOMER_NAME = #{customerName},</if>
+			<if test="customerEmail != ''">CUSTOMER_EMAIL = #{customerEmail},</if>
+			<if test="customerAddr != ''">CUSTOMER_ADDR = #{customerAddr},</if>
+			<if test="customerPhone != ''">CUSTOMER_PHONE = #{customerPhone}</if>
+		</set>
+		WHERE CUSTOMER_NO = #{customerNo}
+	</update>
+
+	<!-- 아이디 찾기 -->
+	<select id="customerIdFindOne" parameterType="map" 
+		resultMap="customerResultMap">
+		SELECT CUSTOMER_ID
+		FROM CUSTOMER
+		WHERE CUSTOMER_NAME = #{customerName}
+		AND CUSTOMER_EMAIL = #{customerEmail}
+	</select>
+
+ 	<!-- 비밀번호 찾기 -->
+	<select id="customerPwdFindOne" parameterType="map" 
+		resultMap="customerResultMap">
+		SELECT CUSTOMER_NO
+		FROM CUSTOMER
+		WHERE CUSTOMER_ID = #{customerId}
+		AND CUSTOMER_NAME = #{customerName}
+		AND CUSTOMER_EMAIL = #{customerEmail}
+	</select>
+	
+	<!-- 비밀번호 재설정 -->
+	<update id="customerPwdResetOne" parameterType="customerDto">
+		UPDATE CUSTOMER
+		<set>
+			<if test="customerPwd != ''">CUSTOMER_PWD = #{customerPwd}</if>
+		</set>
+		WHERE CUSTOMER_NO = #{customerNo}
+	</update>
+	
+	<!-- 캐쉬 조회 -->
+	<select id="customerMoneySelectOne" parameterType="int" 
+		resultMap="customerResultMap">
+		SELECT CUSTOMER_MONEY
+		FROM CUSTOMER
+		WHERE CUSTOMER_NO = #{customerNo}
+	</select>
+
+	<!-- 캐쉬 업데이트 -->
+	<update id="customerMoneyUpdateOne" parameterType="customerDto">
+		UPDATE CUSTOMER
+		SET CUSTOMER_MONEY = CUSTOMER_MONEY + #{customerMoney}
+		WHERE CUSTOMER_NO = #{customerNo}
+		AND CUSTOMER_PWD = #{customerPwd}
+	</update>
+	
+<!-- 	캐쉬 사용하기 -->
+	<update id="customerUseMoneyUpdateOne" parameterType="customerDto">
+		UPDATE CUSTOMER
+		SET CUSTOMER_MONEY = #{customerMoney}
+		WHERE CUSTOMER_NO = #{customerNo}
+	</update>
+	
+ 	
+</mapper>

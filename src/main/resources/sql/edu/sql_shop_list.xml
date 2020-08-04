@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edu.shop.list">
+
+	<resultMap type="itemListDto" id="itemListResultMap">
+		<id 	column="ITEM_NO" 				property="itemNo"/>
+		<result column="ITEM_NAME" 			property="itemName"/>
+		<result column="ITEM_PRICE" 			property="itemPrice"/>
+		<result column="ITEM_STOCK" 			property="itemStock"/>
+		<result column="ITEM_STATE" 			property="itemState"/>
+		<result column="ITEM_CRE_DATE" 			property="itemCreDate"
+									javaType="java.util.Date"/>
+		<result column="ITEM_STORED_IMG_NAME" 			property="itemStoredImgName"/>
+	</resultMap>
+	
+	<resultMap type="saleItemListDto" id="saleItemListResultMap">
+		<id 	column="SALE_NO" 				property="saleNo"/>
+		<result column="ITEM_NO" 			property="itemNo"/>
+		<result column="ITEM_NAME" 			property="itemName"/>
+		<result column="ITEM_OPTION_NO" 			property="itemOptionNo"/>
+		<result column="ITEM_OPTION_NAME" 			property="itemOptionName"/>
+		<result column="ITEM_PRICE" 			property="itemPrice"/>
+		<result column="BASKET_ITEM_VOLUME" 			property="basketItemVolume"/>
+		<result column="SALE_ITEM_VOLUME" 			property="saleItemVolume"/>
+	</resultMap>
+
+	<resultMap type="basketListDto" id="basketListResultMap">
+		<id 	column="BASKET_NO" 				property="basketNo"/>
+		<result column="ITEM_NO" 			property="itemNo"/>
+		<result column="ITEM_NAME" 			property="itemName"/>
+		<result column="BASKET_ITEM_VOLUME" 			property="basketItemVolume"/>
+		<result column="BASKET_CRE_DATE" 			property="basketCreDate" javaType="java.util.Date"/>
+		<result column="BASKET_MOD_DATE" 			property="basketModDate" javaType="java.util.Date"/>
+		<result column="ITEM_OPTION_NO" 			property="itemOptionNo"/>
+		<result column="ITEM_OPTION_NAME" 			property="itemOptionName"/>
+		<result column="ITEM_OPTION_STOCK" 			property="itemOptionStock"/>
+		<result column="ITEM_OPTION_STATE" 			property="itemOptionState"/>
+		<result column="ITEM_PRICE" 			property="itemPrice"/>
+		<result column="ITEM_STOCK" 			property="itemStock"/>
+		<result column="ITEM_STATE" 			property="itemState"/>
+		<result column="CUSTOMER_NO" 			property="customerNo"/>
+	</resultMap>
+
+	<resultMap type="saleListDto" id="saleListResultMap">
+		<id 	column="SALE_NO" 				property="saleNo"/>
+		<result column="ITEM_NAME" 			property="itemName"/>
+		<result column="SALE_PRICE" 			property="salePrice"/>
+		<result column="SALE_DATE" 			property="saleDate" javaType="java.util.Date"/>
+		<result column="SALE_STATE" 			property="saleState"/>
+	</resultMap>
+
+	<select id="itemSelectList" parameterType="map" resultMap="itemListResultMap">
+		SELECT ITEM_NO, ITEM_STORED_IMG_NAME, ITEM_NAME, ITEM_PRICE, ITEM_STOCK, ITEM_CRE_DATE, ITEM_STATE
+		FROM (
+		        SELECT ROWNUM RNUM, S_LIST.ITEM_NO, S_LIST.ITEM_STORED_IMG_NAME, S_LIST.ITEM_NAME, S_LIST.ITEM_STATE
+		        		, S_LIST.ITEM_PRICE, S_LIST.ITEM_STOCK, S_LIST.ITEM_CRE_DATE
+		        from
+		                ( SELECT ITEM.ITEM_NO, IMG.ITEM_STORED_IMG_NAME, ITEM.ITEM_NAME, ITEM.ITEM_PRICE
+		                			, ITEM.ITEM_STOCK, ITEM.ITEM_CRE_DATE, ITEM.ITEM_STATE
+		                  FROM ITEM ITEM LEFT OUTER JOIN (
+		                                                    SELECT ITEM_NO, ITEM_STORED_IMG_NAME
+		                                                    FROM (
+		                                                           SELECT ITEM_NO, ITEM_STORED_IMG_NAME
+		                                                           FROM ITEM_IMG
+		                                                           WHERE ITEM_IMG_THUMBNAIL = 'true'
+		                                                         )
+		                                                    ) IMG
+		                  ON ITEM.ITEM_NO = IMG.ITEM_NO
+		                  WHERE ITEM.ITEM_NAME LIKE '%'||#{keyword}||'%'
+		                  <if test="customerNo != 1">AND ITEM.ITEM_STATE = '활성화'</if>
+		                  ORDER BY ITEM.${orderBy} ${orderOption})S_LIST
+		     )
+		WHERE RNUM BETWEEN #{start} AND #{end}
+	</select>
+	
+	<select id="itemSaleSelectOne" parameterType="map" resultMap="saleItemListResultMap">
+		SELECT ITEM.ITEM_NO, ITEM.ITEM_NAME, IO.ITEM_OPTION_NO, IO.ITEM_OPTION_NAME, (ITEM.ITEM_PRICE + IO.ITEM_OPTION_PRICE) ITEM_PRICE
+		FROM ITEM ITEM JOIN ITEM_OPTION IO
+		ON ITEM.ITEM_NO = IO.ITEM_NO
+		WHERE ITEM.ITEM_NO = #{itemNo}
+		AND IO.ITEM_OPTION_NO = #{itemOptionNo}
+	</select>
+	
+	<select id="basketSelectList" parameterType="int" resultMap="basketListResultMap">
+		SELECT BK.BASKET_NO, S_IT.ITEM_NO, S_IT.ITEM_NAME, S_IT.ITEM_OPTION_NO, S_IT.ITEM_OPTION_NAME
+				, (S_IT.ITEM_PRICE * BK.BASKET_ITEM_VOLUME) ITEM_PRICE, BK.BASKET_ITEM_VOLUME, S_IT.ITEM_OPTION_STOCK, S_IT.ITEM_STATE, S_IT.ITEM_OPTION_STATE
+		FROM BASKET BK 
+		JOIN (
+				SELECT ITEM.ITEM_NO, ITEM.ITEM_NAME, IO.ITEM_OPTION_NO, IO.ITEM_OPTION_NAME, (ITEM.ITEM_PRICE + IO.ITEM_OPTION_PRICE) ITEM_PRICE
+						, IO.ITEM_OPTION_STOCK, ITEM.ITEM_STATE, IO.ITEM_OPTION_STATE
+				FROM ITEM ITEM JOIN ITEM_OPTION IO
+				ON ITEM.ITEM_NO = IO.ITEM_NO
+			 ) S_IT
+		ON BK.ITEM_NO = S_IT.ITEM_NO
+		WHERE BK.ITEM_OPTION_NO = S_IT.ITEM_OPTION_NO
+		AND BK.CUSTOMER_NO = #{customerNo}
+	</select>
+	
+	<select id="saleItemSelectList" parameterType="map" resultMap="saleListResultMap">
+		SELECT SALE_NO, ITEM_NAME, COUNT, SALE_PRICE, SALE_DATE, SALE_STATE
+		FROM (
+		        SELECT ROWNUM RNUM, SALE_NO, ITEM_NAME, COUNT, SALE_PRICE, SALE_DATE, SALE_STATE
+		        FROM
+		                (
+		                SELECT  SALE_NO, ITEM_NAME, COUNT, SALE_PRICE, SALE_DATE, SALE_STATE
+		                FROM(
+		                        SELECT SINFO.SALE_NO, SINFO.ITEM_NAME, SCOUNT.COUNT, SINFO.SALE_PRICE, SINFO.SALE_DATE, SINFO.SALE_STATE
+		                        FROM (
+		                                SELECT SALE.SALE_NO, SALE.CUSTOMER_NO, COUNT(SALE.SALE_NO) AS COUNT
+		                                FROM SALE JOIN SALE_ITEM
+		                                ON SALE.SALE_NO = SALE_ITEM.SALE_NO
+		                                GROUP BY SALE.SALE_NO, SALE.CUSTOMER_NO
+		                                ORDER BY SALE.SALE_NO ) SCOUNT
+		                        JOIN (
+		                                SELECT SALE_NO, ITEM_NO, ITEM_NAME, SALE_PRICE, SALE_DATE, SALE_STATE
+		                                FROM(   SELECT SALE.SALE_NO, ITEM.ITEM_NO, ITEM.ITEM_NAME, SALE.SALE_PRICE, SALE.SALE_STATE, SALE.SALE_DATE
+		                                                , RANK() OVER (PARTITION BY SALE_ITEM.SALE_NO ORDER BY SALE_ITEM.ITEM_OPTION_NO) AS RANK
+		                                        FROM SALE_ITEM JOIN ITEM
+		                                        ON SALE_ITEM.ITEM_NO = ITEM.ITEM_NO
+		                                        JOIN SALE ON SALE.SALE_NO = SALE_ITEM.SALE_NO)
+		                                WHERE RANK = 1 ) SINFO
+		                        ON SCOUNT.SALE_NO = SINFO.SALE_NO
+		                        <if test="customerNo != 1"> WHERE SCOUNT.CUSTOMER_NO = #{customerNo}</if>
+		                        )
+		                ORDER BY SALE_NO DESC) )
+		WHERE RNUM BETWEEN #{start} AND #{end}
+	</select>
+	
+	<select id="saleItemDetailSelectList" parameterType="int" resultMap="saleItemListResultMap">
+		SELECT SALE_ITEM.ITEM_NO, ITEM.ITEM_NAME, SALE_ITEM.ITEM_OPTION_NO, ITEM_OPTION.ITEM_OPTION_NAME
+				, SALE_ITEM.SALE_ITEM_VOLUME, ((ITEM.ITEM_PRICE + ITEM_OPTION.ITEM_OPTION_PRICE) * SALE_ITEM.SALE_ITEM_VOLUME) ITEM_PRICE
+		FROM SALE_ITEM JOIN ITEM
+		ON SALE_ITEM.ITEM_NO = ITEM.ITEM_NO
+		JOIN ITEM_OPTION
+		ON SALE_ITEM.ITEM_OPTION_NO = ITEM_OPTION.ITEM_OPTION_NO
+		WHERE SALE_NO = #{saleNo}
+	</select>
+	
+</mapper>
+
