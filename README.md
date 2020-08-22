@@ -3,7 +3,7 @@
 <div>팀명 뜻 : Java에 J(자)B(빠)G(지)D(다).</div>
 <div>팀원 소개와 사용기술 등은 ppt에 첨부해두었습니다. ppt의 내용은 아래 이미지들과 동일합니다.</div>
 <br>
-<p style="margin: 5px auto">--------------------------------ppt-image--------------------------------</p>
+<p style="margin: 0 auto">--------------------------------ppt-image--------------------------------</p>
 <img width="960px" src="https://user-images.githubusercontent.com/59784467/90959547-bfc95b00-e4d6-11ea-855b-9b6c60e58a9f.jpeg">
 <img width="960px" src="https://user-images.githubusercontent.com/59784467/90959550-c2c44b80-e4d6-11ea-8041-fd5fd7ca897a.jpeg">
 <img width="960px" src="https://user-images.githubusercontent.com/59784467/90959552-c3f57880-e4d6-11ea-898b-664a4ccd3343.jpeg">
