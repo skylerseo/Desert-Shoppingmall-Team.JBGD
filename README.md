@@ -1,6 +1,6 @@
 # Desert Shoppingmall webapp by Team.JBGD
 <div>Completed on November 12, 2019.</div>
-<div>팀명 뜻 : Java에 J(자)B(빠)G(지)D(다).</div>
+<div>팀명 뜻 : J(Java에)B(빠)G(지)D(다).</div>
 <div>팀원 소개와 사용기술 등은 ppt에 첨부해두었습니다. ppt의 내용은 아래 이미지들과 동일합니다.</div>
 <br>
 <p style="margin: 0 auto;">-------------------------------- PPT Image --------------------------------</p>
