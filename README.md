@@ -1,4 +1,5 @@
 # Desert Shoppingmall webapp by Team.JBGD
+![jbgd-macbook](https://user-images.githubusercontent.com/59784467/92408684-3920a900-f179-11ea-811c-ce337b1568d8.png)
 <div>Completed on November 12, 2019.</div>
 <div>팀명 뜻 : J(Java에)B(빠)G(지)D(다).</div>
 <div>팀원 소개와 사용기술 등은 ppt에 첨부해두었습니다. ppt의 내용은 아래 이미지들과 동일합니다.</div>
